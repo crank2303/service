@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres:12
+    container_name: container_pg
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flask:
+    build:
+      context: ./flask_app
+    container_name: container_flask
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tests:
+    build:
+      context: ./tests
+    container_name: container_tests
+    depends_on:
+      - flask
+
+volumes:
+  postgres_data: {}
