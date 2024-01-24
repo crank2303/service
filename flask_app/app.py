@@ -11,6 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@db/postg
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+
 class VisitedLink(db.Model):
     __tablename__ = 'visited_links'
 
@@ -21,6 +22,7 @@ class VisitedLink(db.Model):
 
 with app.app_context():
     db.create_all()
+
 
 @app.route('/visited_links', methods=['POST'])
 def add_visited_links():
@@ -41,6 +43,7 @@ def add_visited_links():
     except Exception as e:
         return jsonify({"status": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
 
+
 @app.route('/visited_domains', methods=['GET'])
 def get_visited_domains():
     try:
@@ -59,11 +62,9 @@ def get_visited_domains():
             from_datetime = datetime.utcfromtimestamp(from_timestamp)
             to_datetime = datetime.utcfromtimestamp(to_timestamp)
 
-
             result = db.session.query(VisitedLink.link).filter(
                 VisitedLink.visited_at.between(from_datetime, to_datetime)
             ).distinct().all()
-
 
             domains = [urlparse(row[0]).netloc[4:] if urlparse(row[0]).netloc[:4] == "www."
                        else urlparse(row[0]).netloc for row in result]
